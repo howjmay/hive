@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"context"
@@ -175,7 +175,7 @@ func (v *vault) createAccount(t *TestEnv, amount *big.Int) common.Address {
 
 	txBlock, err := t.Eth.BlockNumber(t.Ctx())
 	if err != nil {
-		t.Fatalf("can't get block number:", err)
+		t.Fatalf("can't get block number: %s", err)
 	}
 
 	// wait for vaultTxConfirmationCount confirmation by checking the balance vaultTxConfirmationCount blocks back.
@@ -183,7 +183,7 @@ func (v *vault) createAccount(t *TestEnv, amount *big.Int) common.Address {
 	for i := uint64(0); i < vaultTxConfirmationCount*12; i++ {
 		number, err := t.Eth.BlockNumber(t.Ctx())
 		if err != nil {
-			t.Fatalf("can't get block number:", err)
+			t.Fatalf("can't get block number: %s", err)
 		}
 		if number > txBlock+vaultTxConfirmationCount {
 			checkBlock := number - vaultTxConfirmationCount

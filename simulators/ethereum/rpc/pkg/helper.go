@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
@@ -16,7 +17,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/hive/hivesim"
 	"github.com/kr/pretty"
 )
 
@@ -25,7 +25,7 @@ var rpcTimeout = 10 * time.Second
 
 // TestClient is the environment of a single test.
 type TestEnv struct {
-	*hivesim.T
+	*testing.T
 	RPC   *rpc.Client
 	Eth   *ethclient.Client
 	Vault *vault
@@ -38,7 +38,7 @@ type TestEnv struct {
 }
 
 // runHTTP runs the given test function using the HTTP RPC client.
-func runHTTP(t *hivesim.T, c *hivesim.Client, v *vault, fn func(*TestEnv)) {
+func runHTTP(t *testing.T, host string, v *vault, fn func(*TestEnv)) {
 	// This sets up debug logging of the requests and responses.
 	client := &http.Client{
 		Transport: &loggingRoundTrip{
@@ -47,7 +47,7 @@ func runHTTP(t *hivesim.T, c *hivesim.Client, v *vault, fn func(*TestEnv)) {
 		},
 	}
 
-	rpcClient, _ := rpc.DialHTTPWithClient(fmt.Sprintf("http://%v:8545/", c.IP), client)
+	rpcClient, _ := rpc.DialHTTPWithClient(fmt.Sprintf("http://%v:8545/v1/chain/evm", host), client)
 	defer rpcClient.Close()
 	env := &TestEnv{
 		T:     t,
@@ -62,9 +62,9 @@ func runHTTP(t *hivesim.T, c *hivesim.Client, v *vault, fn func(*TestEnv)) {
 }
 
 // runWS runs the given test function using the WebSocket RPC client.
-func runWS(t *hivesim.T, c *hivesim.Client, v *vault, fn func(*TestEnv)) {
+func runWS(t *testing.T, host string, v *vault, fn func(*TestEnv)) {
 	ctx, done := context.WithTimeout(context.Background(), 5*time.Second)
-	rpcClient, err := rpc.DialWebsocket(ctx, fmt.Sprintf("ws://%v:8546/", c.IP), "")
+	rpcClient, err := rpc.DialWebsocket(ctx, fmt.Sprintf("ws://%v:8546/", host), "")
 	done()
 	if err != nil {
 		t.Fatal("WebSocket connection failed:", err)
@@ -183,7 +183,7 @@ func waitForTxConfirmations(t *TestEnv, txHash common.Hash, n uint64) (*types.Re
 
 // loggingRoundTrip writes requests and responses to the test log.
 type loggingRoundTrip struct {
-	t     *hivesim.T
+	t     *testing.T
 	inner http.RoundTripper
 }
 
@@ -217,7 +217,11 @@ func (rt *loggingRoundTrip) RoundTrip(req *http.Request) (*http.Response, error)
 }
 
 func loadGenesis() *types.Block {
-	contents, err := os.ReadFile("init/genesis.json")
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	contents, err := os.ReadFile(dir + "/../init/genesis.json")
 	if err != nil {
 		panic(fmt.Errorf("can't to read genesis file: %v", err))
 	}

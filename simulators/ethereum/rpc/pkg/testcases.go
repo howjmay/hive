@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"bytes"
@@ -461,7 +461,7 @@ func deployContractOutOfGasTest(t *TestEnv) {
 		t.Errorf("receipt has contract address %x, want %x", receipt.ContractAddress, contractAddress)
 	}
 	if receipt.BlockHash == (common.Hash{}) {
-		t.Errorf("receipt has empty block hash", receipt.BlockHash)
+		t.Error("receipt has empty block hash", receipt.BlockHash)
 	}
 	// Check that nothing is deployed at the contract address.
 	code, err := t.Eth.CodeAt(t.Ctx(), contractAddress, nil)
@@ -853,7 +853,7 @@ func TransactionReceiptTest(t *TestEnv) {
 			t.Errorf("Unable to fetch receipt: %v", err)
 		}
 		if receipt.TxHash != tx.Hash() {
-			t.Errorf("Receipt [tx=%x] contains invalid tx hash, want %x, got %x", tx.Hash(), receipt.TxHash)
+			t.Errorf("Receipt [tx=%x] contains invalid tx hash, want %x", tx.Hash(), receipt.TxHash)
 		}
 		if receipt.ContractAddress != (common.Address{}) {
 			t.Errorf("Receipt [tx=%x] contains invalid contract address, expected empty address but got %x", tx.Hash(), receipt.ContractAddress)
