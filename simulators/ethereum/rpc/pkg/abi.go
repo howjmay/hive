@@ -44,7 +44,7 @@ func callContractTest(t *TestEnv) {
 		t.Fatalf("Unable to fetch map value: %v", err)
 	}
 	if expected.Cmp(value) != 0 {
-		t.Errorf("Invalid value retrieve from address=>uint mapping, want %d, got %d", expected, value)
+		t.Fatalf("Invalid value retrieve from address=>uint mapping, want %d, got %d", expected, value)
 	}
 
 	expA, expB, expC := big.NewInt(1111), big.NewInt(2222), big.NewInt(3333)
@@ -54,13 +54,13 @@ func callContractTest(t *TestEnv) {
 	}
 
 	if expA.Cmp(a) != 0 {
-		t.Errorf("A has invalid value, want %d, got %d", expA, a)
+		t.Fatalf("A has invalid value, want %d, got %d", expA, a)
 	}
 	if expB.Cmp(b) != 0 {
-		t.Errorf("B has invalid value, want %d, got %d", expB, b)
+		t.Fatalf("B has invalid value, want %d, got %d", expB, b)
 	}
 	if expC.Cmp(c) != 0 {
-		t.Errorf("C has invalid value, want %d, got %d", expC, c)
+		t.Fatalf("C has invalid value, want %d, got %d", expC, c)
 	}
 }
 

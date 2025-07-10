@@ -139,7 +139,7 @@ func estimateGasTest(t *TestEnv) {
 // address are updated correct.
 func balanceAndNonceAtTest(t *TestEnv) {
 	var (
-		sourceAddr  = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		sourceAddr  = t.Vault.createAccount(t, big.NewInt(13000000000000000))
 		sourceNonce = uint64(0)
 		targetAddr  = t.Vault.createAccount(t, nil)
 	)
@@ -150,9 +150,9 @@ func balanceAndNonceAtTest(t *TestEnv) {
 		t.Fatalf("Unable to retrieve balance: %v", err)
 	}
 
-	expected := big.NewInt(params.Ether)
+	expected := big.NewInt(13000000000000000)
 	if sourceAddressBalanceBefore.Cmp(expected) != 0 {
-		t.Errorf("Expected balance %d, got %d", expected, sourceAddressBalanceBefore)
+		t.Fatalf("Expected balance %d, got %d", expected, sourceAddressBalanceBefore)
 	}
 
 	nonceBefore, err := t.Eth.NonceAt(t.Ctx(), sourceAddr, nil)
@@ -208,10 +208,10 @@ func balanceAndNonceAtTest(t *TestEnv) {
 	exp.Sub(exp, new(big.Int).Mul(big.NewInt(int64(receipt.GasUsed)), valueTx.GasPrice()))
 
 	if exp.Cmp(accountBalanceAfter) != 0 {
-		t.Errorf("Expected sender account to have a balance of %d, got %d", exp, accountBalanceAfter)
+		t.Fatalf("Expected sender account to have a balance of %d, got %d", exp, accountBalanceAfter)
 	}
 	if balanceTargetAccountAfter.Cmp(amount) != 0 {
-		t.Errorf("Expected new account to have a balance of %d, got %d", valueTx.Value(), balanceTargetAccountAfter)
+		t.Fatalf("Expected new account to have a balance of %d, got %d", valueTx.Value(), balanceTargetAccountAfter)
 	}
 
 	// ensure nonce is incremented by 1
@@ -308,7 +308,7 @@ func canonicalChainTest(t *TestEnv) {
 		}
 		if childBlock != nil {
 			if childBlock.ParentHash() != block.Hash() {
-				t.Errorf("Canonical chain broken on %d-%d / %x-%x", block.NumberU64(), childBlock.NumberU64(), block.Hash(), childBlock.Hash())
+				t.Fatalf("Canonical chain broken on %d-%d / %x-%x", block.NumberU64(), childBlock.NumberU64(), block.Hash(), childBlock.Hash())
 			}
 		}
 
@@ -391,7 +391,7 @@ func deployContractTest(t *TestEnv) {
 		t.Fatalf("Unable to fetch contract code: %v", err)
 	}
 	if bytes.Compare(runtimeCode, code) != 0 {
-		t.Errorf("Deployed code doesn't match, expected %x, got %x", runtimeCode, code)
+		t.Fatalf("Deployed code doesn't match, expected %x, got %x", runtimeCode, code)
 	}
 
 	// test contract state, pos 0 must be 1234
@@ -399,10 +399,10 @@ func deployContractTest(t *TestEnv) {
 	if err == nil {
 		v := new(big.Int).SetBytes(value)
 		if v.Uint64() != 1234 {
-			t.Errorf("Unexpected value on %x:0x01, expected 1234, got %d", receipt.ContractAddress, v)
+			t.Fatalf("Unexpected value on %x:0x01, expected 1234, got %d", receipt.ContractAddress, v)
 		}
 	} else {
-		t.Errorf("Unable to retrieve storage pos 0x01 on address %x: %v", contractAddress, err)
+		t.Fatalf("Unable to retrieve storage pos 0x01 on address %x: %v", contractAddress, err)
 	}
 
 	// test contract state, map on pos 1 with key myAccount must be 1234
@@ -415,7 +415,7 @@ func deployContractTest(t *TestEnv) {
 	if err == nil {
 		v := new(big.Int).SetBytes(value)
 		if v.Uint64() != 1234 {
-			t.Errorf("Unexpected value in map, expected 1234, got %d", v)
+			t.Fatalf("Unexpected value in map, expected 1234, got %d", v)
 		}
 	} else {
 		t.Fatalf("Unable to retrieve value in map: %v", err)
@@ -452,16 +452,16 @@ func deployContractOutOfGasTest(t *TestEnv) {
 	}
 	// Check receipt fields.
 	if receipt.Status != types.ReceiptStatusFailed {
-		t.Errorf("receipt has status %d, want %d", receipt.Status, types.ReceiptStatusFailed)
+		t.Fatalf("receipt has status %d, want %d", receipt.Status, types.ReceiptStatusFailed)
 	}
 	if receipt.GasUsed != gasLimit {
-		t.Errorf("receipt has gasUsed %d, want %d", receipt.GasUsed, gasLimit)
+		t.Fatalf("receipt has gasUsed %d, want %d", receipt.GasUsed, gasLimit)
 	}
 	if receipt.ContractAddress != contractAddress {
-		t.Errorf("receipt has contract address %x, want %x", receipt.ContractAddress, contractAddress)
+		t.Fatalf("receipt has contract address %x, want %x", receipt.ContractAddress, contractAddress)
 	}
 	if receipt.BlockHash == (common.Hash{}) {
-		t.Error("receipt has empty block hash", receipt.BlockHash)
+		t.Fatal("receipt has empty block hash", receipt.BlockHash)
 	}
 	// Check that nothing is deployed at the contract address.
 	code, err := t.Eth.CodeAt(t.Ctx(), contractAddress, nil)
@@ -469,7 +469,7 @@ func deployContractOutOfGasTest(t *TestEnv) {
 		t.Fatalf("unable to fetch code: %v", err)
 	}
 	if len(code) != 0 {
-		t.Errorf("expected no code deployed but got %x", code)
+		t.Fatalf("expected no code deployed but got %x", code)
 	}
 }
 
@@ -506,14 +506,14 @@ func receiptTest(t *TestEnv) {
 	}
 	// validate receipt fields
 	if receipt.TxHash != tx.Hash() {
-		t.Errorf("Receipt contains invalid tx hash, want %x, got %x", tx.Hash(), receipt.TxHash)
+		t.Fatalf("Receipt contains invalid tx hash, want %x, got %x", tx.Hash(), receipt.TxHash)
 	}
 	if receipt.ContractAddress != (common.Address{}) {
-		t.Errorf("Receipt contains invalid contract address, want empty address got %x", receipt.ContractAddress)
+		t.Fatalf("Receipt contains invalid contract address, want empty address got %x", receipt.ContractAddress)
 	}
 	bloom := types.CreateBloom(types.Receipts{receipt})
 	if receipt.Bloom != bloom {
-		t.Errorf("Receipt contains invalid bloom, want %x, got %x", bloom, receipt.Bloom)
+		t.Fatalf("Receipt contains invalid bloom, want %x, got %x", bloom, receipt.Bloom)
 	}
 
 	var (
@@ -537,13 +537,13 @@ func receiptTest(t *TestEnv) {
 // standard contract is called with argData.
 func validateLog(t *TestEnv, tx *types.Transaction, log types.Log, contractAddress common.Address, index uint, ev abi.Event, argData ...[]byte) {
 	if log.Address != contractAddress {
-		t.Errorf("Log[%d] contains invalid address, want 0x%x, got 0x%x [tx=0x%x]", index, contractAddress, log.Address, tx.Hash())
+		t.Fatalf("Log[%d] contains invalid address, want 0x%x, got 0x%x [tx=0x%x]", index, contractAddress, log.Address, tx.Hash())
 	}
 	if log.TxHash != tx.Hash() {
-		t.Errorf("Log[%d] contains invalid hash, want 0x%x, got 0x%x [tx=0x%x]", index, tx.Hash(), log.TxHash, tx.Hash())
+		t.Fatalf("Log[%d] contains invalid hash, want 0x%x, got 0x%x [tx=0x%x]", index, tx.Hash(), log.TxHash, tx.Hash())
 	}
 	if log.Index != index {
-		t.Errorf("Log[%d] has invalid index, want %d, got %d [tx=0x%x]", index, index, log.Index, tx.Hash())
+		t.Fatalf("Log[%d] has invalid index, want %d, got %d [tx=0x%x]", index, index, log.Index, tx.Hash())
 	}
 
 	// assemble expected topics and log data
@@ -563,16 +563,16 @@ func validateLog(t *TestEnv, tx *types.Transaction, log types.Log, contractAddre
 	}
 
 	if len(log.Topics) != len(topics) {
-		t.Errorf("Log[%d] contains invalid number of topics, want %d, got %d [tx=0x%x]", index, len(topics), len(log.Topics), tx.Hash())
+		t.Fatalf("Log[%d] contains invalid number of topics, want %d, got %d [tx=0x%x]", index, len(topics), len(log.Topics), tx.Hash())
 	} else {
 		for i, topic := range topics {
 			if topics[i] != topic {
-				t.Errorf("Log[%d] contains invalid topic, want 0x%x, got 0x%x [tx=0x%x]", index, topics[i], topic, tx.Hash())
+				t.Fatalf("Log[%d] contains invalid topic, want 0x%x, got 0x%x [tx=0x%x]", index, topics[i], topic, tx.Hash())
 			}
 		}
 	}
 	if !bytes.Equal(log.Data, data) {
-		t.Errorf("Log[%d] contains invalid data, want 0x%x, got 0x%x [tx=0x%x]", index, data, log.Data, tx.Hash())
+		t.Fatalf("Log[%d] contains invalid data, want 0x%x, got 0x%x [tx=0x%x]", index, data, log.Data, tx.Hash())
 	}
 }
 
@@ -850,22 +850,22 @@ func TransactionReceiptTest(t *TestEnv) {
 		}
 
 		if err != nil {
-			t.Errorf("Unable to fetch receipt: %v", err)
+			t.Fatalf("Unable to fetch receipt: %v", err)
 		}
 		if receipt.TxHash != tx.Hash() {
-			t.Errorf("Receipt [tx=%x] contains invalid tx hash, want %x", tx.Hash(), receipt.TxHash)
+			t.Fatalf("Receipt [tx=%x] contains invalid tx hash, want %x", tx.Hash(), receipt.TxHash)
 		}
 		if receipt.ContractAddress != (common.Address{}) {
-			t.Errorf("Receipt [tx=%x] contains invalid contract address, expected empty address but got %x", tx.Hash(), receipt.ContractAddress)
+			t.Fatalf("Receipt [tx=%x] contains invalid contract address, expected empty address but got %x", tx.Hash(), receipt.ContractAddress)
 		}
 		if receipt.Bloom.Big().Cmp(big0) != 0 {
-			t.Errorf("Receipt [tx=%x] bloom not empty, %x", tx.Hash(), receipt.Bloom)
+			t.Fatalf("Receipt [tx=%x] bloom not empty, %x", tx.Hash(), receipt.Bloom)
 		}
 		if receipt.GasUsed != params.TxGas {
-			t.Errorf("Receipt [tx=%x] has invalid gas used, want %d, got %d", tx.Hash(), params.TxGas, receipt.GasUsed)
+			t.Fatalf("Receipt [tx=%x] has invalid gas used, want %d, got %d", tx.Hash(), params.TxGas, receipt.GasUsed)
 		}
 		if len(receipt.Logs) != 0 {
-			t.Errorf("Receipt [tx=%x] should not contain logs but got %d logs", tx.Hash(), len(receipt.Logs))
+			t.Fatalf("Receipt [tx=%x] should not contain logs but got %d logs", tx.Hash(), len(receipt.Logs))
 		}
 		return
 	}

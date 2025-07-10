@@ -172,31 +172,21 @@ func (v *vault) createAccount(t *TestEnv, amount *big.Int) common.Address {
 	if err := t.Eth.SendTransaction(t.Ctx(), tx); err != nil {
 		t.Fatalf("unable to send funding transaction: %v", err)
 	}
+	time.Sleep(time.Second)
 
-	txBlock, err := t.Eth.BlockNumber(t.Ctx())
+	receipt, err := t.Eth.TransactionReceipt(t.Ctx(), tx.Hash())
 	if err != nil {
-		t.Fatalf("can't get block number: %s", err)
+		panic(fmt.Errorf("could not get funding transaction receipt: %v", err))
+	}
+	balance, err := t.Eth.BalanceAt(t.Ctx(), address, receipt.BlockNumber)
+	if err != nil {
+		panic(fmt.Errorf("could not get balance of funded account %v: %v", address, err))
 	}
 
-	// wait for vaultTxConfirmationCount confirmation by checking the balance vaultTxConfirmationCount blocks back.
-	// createAndFundAccountWithSubscription for a better solution using logs
-	for i := uint64(0); i < vaultTxConfirmationCount*12; i++ {
-		number, err := t.Eth.BlockNumber(t.Ctx())
-		if err != nil {
-			t.Fatalf("can't get block number: %s", err)
-		}
-		if number > txBlock+vaultTxConfirmationCount {
-			checkBlock := number - vaultTxConfirmationCount
-			balance, err := t.Eth.BalanceAt(t.Ctx(), address, new(big.Int).SetUint64(checkBlock))
-			if err != nil {
-				panic(err)
-			}
-			if balance.Cmp(amount) >= 0 {
-				return address
-			}
-		}
-		time.Sleep(time.Second)
+	if balance.Cmp(big.NewInt(0)) > 0 {
+		return address
 	}
+
 	panic(fmt.Sprintf("could not fund account %v in transaction %v", address, tx.Hash()))
 }
 

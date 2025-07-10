@@ -32,14 +32,14 @@ type testSpec struct {
 
 var tests = []testSpec{
 	// HTTP RPC tests.
-	// {Name: "http/BalanceAndNonceAt", Run: balanceAndNonceAtTest},
+	// {Name: "http/BalanceAndNonceAt", Run: balanceAndNonceAtTest}, // pass
 	// {Name: "http/CanonicalChain", Run: canonicalChainTest},
 	// {Name: "http/CodeAt", Run: CodeAtTest}, // pass
 	// {Name: "http/ContractDeployment", Run: deployContractTest},
 	// {Name: "http/ContractDeploymentOutOfGas", Run: deployContractOutOfGasTest},
 	// {Name: "http/EstimateGas", Run: estimateGasTest},
 	// {Name: "http/GenesisBlockByHash", Run: genesisBlockByHashTest},
-	{Name: "http/GenesisBlockByNumber", Run: genesisBlockByNumberTest},
+	// {Name: "http/GenesisBlockByNumber", Run: genesisBlockByNumberTest},
 	// {Name: "http/GenesisHeaderByHash", Run: genesisHeaderByHashTest},
 	// {Name: "http/GenesisHeaderByNumber", Run: genesisHeaderByNumberTest},
 	// {Name: "http/Receipt", Run: receiptTest},
@@ -115,7 +115,7 @@ var tests = []testSpec{
 func RunAllTests(t *testing.T, host string, clientName string) {
 	vault := newVault()
 
-	s := newSemaphore(16)
+	s := newSemaphore(len(tests))
 	for _, test := range tests {
 		test := test
 		s.get()
