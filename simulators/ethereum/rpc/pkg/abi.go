@@ -68,7 +68,7 @@ func callContractTest(t *TestEnv) {
 // waits for logs.
 func transactContractTest(t *TestEnv) {
 	var (
-		address = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		address = t.Vault.createAccount(t, big.NewInt(3*PrefundValue))
 		nonce   = uint64(0)
 
 		expectedContractAddress = crypto.CreateAddress(address, nonce)

@@ -69,6 +69,8 @@ contract Test {
 	predeployedContractABI = `[{"constant":true,"inputs":[],"name":"ui","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"addr","type":"address"}],"name":"getFromMap","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"addr","type":"address"},{"name":"value","type":"uint256"}],"name":"addToMap","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"ui_","type":"uint256"},{"name":"addr_","type":"address"}],"name":"events","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"a","type":"uint256"},{"name":"b","type":"uint256"},{"name":"c","type":"uint256"}],"name":"constFunc","outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"inputs":[{"name":"ui_","type":"uint256"}],"payable":false,"type":"constructor"},{"anonymous":false,"inputs":[],"name":"E0","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"","type":"uint256"}],"name":"E1","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"","type":"uint256"}],"name":"E2","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"","type":"address"}],"name":"E3","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"","type":"address"}],"name":"E4","type":"event"},{"anonymous":true,"inputs":[{"indexed":false,"name":"","type":"uint256"},{"indexed":false,"name":"","type":"address"}],"name":"E5","type":"event"}]`
 )
 
+const PrefundValue = 13000000000000000
+
 var (
 	big0 = new(big.Int)
 	big1 = big.NewInt(1)
@@ -88,7 +90,7 @@ func CodeAtTest(t *TestEnv) {
 // estimateGasTest fetches the estimated gas usage for a call to the events method.
 func estimateGasTest(t *TestEnv) {
 	var (
-		address        = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		address        = t.Vault.createAccount(t, big.NewInt(PrefundValue))
 		contractABI, _ = abi.JSON(strings.NewReader(predeployedContractABI))
 		intArg         = big.NewInt(rand.Int63())
 	)
@@ -139,7 +141,7 @@ func estimateGasTest(t *TestEnv) {
 // address are updated correct.
 func balanceAndNonceAtTest(t *TestEnv) {
 	var (
-		sourceAddr  = t.Vault.createAccount(t, big.NewInt(13000000000000000))
+		sourceAddr  = t.Vault.createAccount(t, big.NewInt(PrefundValue))
 		sourceNonce = uint64(0)
 		targetAddr  = t.Vault.createAccount(t, nil)
 	)
@@ -150,7 +152,7 @@ func balanceAndNonceAtTest(t *TestEnv) {
 		t.Fatalf("Unable to retrieve balance: %v", err)
 	}
 
-	expected := big.NewInt(13000000000000000)
+	expected := big.NewInt(PrefundValue)
 	if sourceAddressBalanceBefore.Cmp(expected) != 0 {
 		t.Fatalf("Expected balance %d, got %d", expected, sourceAddressBalanceBefore)
 	}
@@ -353,7 +355,7 @@ func canonicalChainTest(t *TestEnv) {
 // on the contract address contain the expected values (as set in the ctor).
 func deployContractTest(t *TestEnv) {
 	var (
-		address = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		address = t.Vault.createAccount(t, big.NewInt(3*PrefundValue))
 		nonce   = uint64(0)
 
 		expectedContractAddress = crypto.CreateAddress(address, nonce)
@@ -427,7 +429,7 @@ func deployContractTest(t *TestEnv) {
 // the contract address.
 func deployContractOutOfGasTest(t *TestEnv) {
 	var (
-		address         = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		address         = t.Vault.createAccount(t, big.NewInt(3*PrefundValue))
 		nonce           = uint64(0)
 		contractAddress = crypto.CreateAddress(address, nonce)
 		gasLimit        = uint64(240000) // insufficient gas
@@ -478,7 +480,7 @@ func deployContractOutOfGasTest(t *TestEnv) {
 func receiptTest(t *TestEnv) {
 	var (
 		contractABI, _ = abi.JSON(strings.NewReader(predeployedContractABI))
-		address        = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		address        = t.Vault.createAccount(t, big.NewInt(2*PrefundValue))
 		nonce          = uint64(0)
 
 		intArg = big.NewInt(rand.Int63())
@@ -588,7 +590,7 @@ func syncProgressTest(t *TestEnv) {
 // and retrieves transaction details by block hash and position.
 func transactionInBlockTest(t *TestEnv) {
 	var (
-		key         = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		key         = t.Vault.createAccount(t, big.NewInt(PrefundValue))
 		nonce       = uint64(0)
 		blockNumber = new(big.Int)
 	)
@@ -637,7 +639,7 @@ func transactionInBlockSubscriptionTest(t *TestEnv) {
 		t.Fatalf("Unable to subscribe to new heads: %v", err)
 	}
 
-	key := t.Vault.createAccount(t, big.NewInt(params.Ether))
+	key := t.Vault.createAccount(t, big.NewInt(PrefundValue))
 	for i := 0; i < 5; i++ {
 		rawTx := types.NewTransaction(uint64(i), predeployedVaultAddr, big1, 100000, gasPrice, nil)
 		tx, err := t.Vault.signTransaction(key, rawTx)
@@ -716,7 +718,7 @@ func logSubscriptionTest(t *TestEnv) {
 
 	var (
 		contractABI, _ = abi.JSON(strings.NewReader(predeployedContractABI))
-		address        = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		address        = t.Vault.createAccount(t, big.NewInt(PrefundValue))
 		nonce          = uint64(0)
 
 		arg0 = big.NewInt(rand.Int63())
@@ -793,7 +795,7 @@ func validatePredeployContractLogs(t *TestEnv, tx *types.Transaction, logs []typ
 
 func transactionCountTest(t *TestEnv) {
 	var (
-		key = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		key = t.Vault.createAccount(t, big.NewInt(PrefundValue))
 	)
 
 	for i := 0; i < 60; i++ {
@@ -829,7 +831,7 @@ func transactionCountTest(t *TestEnv) {
 // TransactionReceiptTest sends a transaction and tests the receipt fields.
 func TransactionReceiptTest(t *TestEnv) {
 	var (
-		key = t.Vault.createAccount(t, big.NewInt(params.Ether))
+		key = t.Vault.createAccount(t, big.NewInt(PrefundValue))
 	)
 
 	rawTx := types.NewTransaction(uint64(0), common.Address{}, big1, 100000, gasPrice, nil)

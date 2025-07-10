@@ -33,24 +33,24 @@ type testSpec struct {
 var tests = []testSpec{
 	// HTTP RPC tests.
 	// {Name: "http/BalanceAndNonceAt", Run: balanceAndNonceAtTest}, // pass
-	// {Name: "http/CanonicalChain", Run: canonicalChainTest},
+	// {Name: "http/CanonicalChain", Run: canonicalChainTest}, // FIXME different from Geth
 	// {Name: "http/CodeAt", Run: CodeAtTest}, // pass
-	// {Name: "http/ContractDeployment", Run: deployContractTest},
-	// {Name: "http/ContractDeploymentOutOfGas", Run: deployContractOutOfGasTest},
-	// {Name: "http/EstimateGas", Run: estimateGasTest},
-	// {Name: "http/GenesisBlockByHash", Run: genesisBlockByHashTest},
-	// {Name: "http/GenesisBlockByNumber", Run: genesisBlockByNumberTest},
-	// {Name: "http/GenesisHeaderByHash", Run: genesisHeaderByHashTest},
-	// {Name: "http/GenesisHeaderByNumber", Run: genesisHeaderByNumberTest},
-	// {Name: "http/Receipt", Run: receiptTest},
-	// {Name: "http/SyncProgress", Run: syncProgressTest},
+	// {Name: "http/ContractDeployment", Run: deployContractTest}, // pass
+	// {Name: "http/ContractDeploymentOutOfGas", Run: deployContractOutOfGasTest}, // FIXME it looks like behavior may be different
+	// {Name: "http/EstimateGas", Run: estimateGasTest}, // pass
+	// {Name: "http/GenesisBlockByHash", Run: genesisBlockByHashTest}, // FIXME header hash is different, this is caused by different block's header format
+	// {Name: "http/GenesisBlockByNumber", Run: genesisBlockByNumberTest}, // FIXME different block's header format
+	// {Name: "http/GenesisHeaderByHash", Run: genesisHeaderByHashTest}, // FIXME different block's header format
+	// {Name: "http/GenesisHeaderByNumber", Run: genesisHeaderByNumberTest}, // FIXME different block's header format
+	// {Name: "http/Receipt", Run: receiptTest}, // pass
+	// {Name: "http/SyncProgress", Run: syncProgressTest}, // FIXME tests passed, but I doubt we return proper values here
 	// {Name: "http/TransactionCount", Run: transactionCountTest},
-	// {Name: "http/TransactionInBlock", Run: transactionInBlockTest},
-	// {Name: "http/TransactionReceipt", Run: TransactionReceiptTest},
+	// {Name: "http/TransactionInBlock", Run: transactionInBlockTest}, // pass
+	// {Name: "http/TransactionReceipt", Run: TransactionReceiptTest}, // FIXME failed by different base cost of each tx
 
 	// HTTP ABI tests.
-	// {Name: "http/ABICall", Run: callContractTest},
-	// {Name: "http/ABITransact", Run: transactContractTest},
+	// {Name: "http/ABICall", Run: callContractTest}, // passed
+	// {Name: "http/ABITransact", Run: transactContractTest}, // passed
 
 	// // WebSocket RPC tests.
 	// {Name: "ws/BalanceAndNonceAt", Run: balanceAndNonceAtTest},

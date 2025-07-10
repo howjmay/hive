@@ -187,7 +187,7 @@ func (v *vault) createAccount(t *TestEnv, amount *big.Int) common.Address {
 		return address
 	}
 
-	panic(fmt.Sprintf("could not fund account %v in transaction %v", address, tx.Hash()))
+	panic(fmt.Sprintf("could not fund account %v in transaction %v, current balance: %s", address, tx.Hash(), balance.String()))
 }
 
 func (v *vault) makeFundingTx(t *TestEnv, recipient common.Address, amount *big.Int) *types.Transaction {
