@@ -34,7 +34,7 @@ var tests = []testSpec{
 	// HTTP RPC tests.
 	// {Name: "http/BalanceAndNonceAt", Run: balanceAndNonceAtTest}, // pass
 	// {Name: "http/CanonicalChain", Run: canonicalChainTest}, // FIXME different from Geth
-	// {Name: "http/CodeAt", Run: CodeAtTest}, // pass
+	// {Name: "http/CodeAt", Run: CodeAtTest},                     // pass
 	// {Name: "http/ContractDeployment", Run: deployContractTest}, // pass
 	// {Name: "http/ContractDeploymentOutOfGas", Run: deployContractOutOfGasTest}, // FIXME it looks like behavior may be different
 	// {Name: "http/EstimateGas", Run: estimateGasTest}, // pass
@@ -70,13 +70,13 @@ var tests = []testSpec{
 	// {Name: "ws/TransactionReceipt", Run: TransactionReceiptTest},
 
 	// // WebSocket subscription tests.
-	// {Name: "ws/NewHeadSubscription", Run: newHeadSubscriptionTest},
+	// {Name: "ws/NewHeadSubscription", Run: newHeadSubscriptionTest}, // FIXME failed because the block generation diff
 	// {Name: "ws/LogSubscription", Run: logSubscriptionTest},
 	// {Name: "ws/TransactionInBlockSubscription", Run: transactionInBlockSubscriptionTest},
 
 	// // WebSocket ABI tests.
-	// {Name: "ws/ABICall", Run: callContractTest},
-	// {Name: "ws/ABITransact", Run: transactContractTest},
+	// {Name: "ws/ABICall", Run: callContractTest}, // pass
+	// {Name: "ws/ABITransact", Run: transactContractTest}, // pass
 }
 
 // func runLESTests(t *testing.T, serverNode *hivesim.Client) {

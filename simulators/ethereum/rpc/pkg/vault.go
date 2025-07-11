@@ -183,7 +183,7 @@ func (v *vault) createAccount(t *TestEnv, amount *big.Int) common.Address {
 		panic(fmt.Errorf("could not get balance of funded account %v: %v", address, err))
 	}
 
-	if balance.Cmp(big.NewInt(0)) > 0 {
+	if balance.Cmp(amount) >= 0 {
 		return address
 	}
 

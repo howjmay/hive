@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"bytes"
+	"fmt"
 	"math/big"
 	"math/rand"
 	"strings"
@@ -686,6 +687,7 @@ func newHeadSubscriptionTest(t *TestEnv) {
 
 	defer sub.Unsubscribe()
 	for i := 0; i < 10; i++ {
+		fmt.Println("Waiting for new head...")
 		select {
 		case newHead := <-heads:
 			header, err := t.Eth.HeaderByHash(t.Ctx(), newHead.Hash())
