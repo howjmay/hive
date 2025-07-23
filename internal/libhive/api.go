@@ -243,6 +243,8 @@ func (api *simAPI) startClient(w http.ResponseWriter, r *http.Request) {
 	if timeout == 0 {
 		timeout = defaultStartTimeout
 	}
+	// FIXME temp value
+	timeout = 500 * time.Second
 	ctx, cancel := context.WithTimeout(r.Context(), timeout)
 	defer cancel()
 
