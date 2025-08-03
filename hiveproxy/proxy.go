@@ -15,14 +15,10 @@ import (
 	"context"
 	"embed"
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"runtime/debug"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -88,7 +84,6 @@ func (p *Proxy) CheckLive(ctx context.Context, addr *net.TCPAddr) error {
 	time.Sleep(60 * time.Second) // Give the frontend a chance to start.
 
 	id := atomic.AddUint64(&p.callID, 1)
-	_ = testCurlCheckLive(ctx, id, addr.String())
 
 	// Set up cancellation relay.
 	checkDone := make(chan struct{})
@@ -99,30 +94,6 @@ func (p *Proxy) CheckLive(ctx context.Context, addr *net.TCPAddr) error {
 	}()
 
 	return p.rpc.CallContext(ctx, nil, "proxy_checkLive", id, addr.String())
-}
-
-func testCurlCheckLive(ctx context.Context, id uint64, addr string) error {
-	client := &http.Client{}
-	var data = strings.NewReader(`{"method":"web3_sha3","params":["0x68656c6c6f20776f726c64"],"id":1,"jsonrpc":"2.0"}`)
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s/v1/chain/evm", addr), data)
-	if err != nil {
-		debug.PrintStack()
-		log.Fatal(err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := client.Do(req)
-	if err != nil {
-		debug.PrintStack()
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	bodyText, err := io.ReadAll(resp.Body)
-	if err != nil {
-		debug.PrintStack()
-		log.Fatal(err)
-	}
-	fmt.Printf("Finsh testCurlCheckLive %s\n", bodyText)
-	return nil
 }
 
 // relayCancel notifies the proxy front-end when an RPC action is canceled.

@@ -101,6 +101,9 @@ func (b *ContainerBackend) CreateContainer(ctx context.Context, imageName string
 			Env:    vars,
 			Labels: opt.Labels,
 		},
+		HostConfig: &docker.HostConfig{
+			ExtraHosts: []string{"host.docker.internal:host-gateway"},
+		},
 	}
 
 	if opt.Input != nil {
@@ -440,7 +443,9 @@ func (b *ContainerBackend) runContainer(ctx context.Context, logger *slog.Logger
 	closer.w = waiter
 
 	logger.Debug("starting container")
-	if err := b.client.StartContainerWithContext(id, nil, ctx); err != nil {
+	if err := b.client.StartContainerWithContext(id, &docker.HostConfig{
+		ExtraHosts: []string{"host.docker.internal:host-gateway"},
+	}, ctx); err != nil {
 		closer.Close()
 		logger.Error("failed to start container", "err", err)
 		return nil, err
