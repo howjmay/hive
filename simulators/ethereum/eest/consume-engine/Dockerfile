@@ -11,12 +11,15 @@ ENV GIT_REF=${branch}
 RUN apt-get update && apt-get install -y git
 
 # Allow the user to specify a branch or commit to checkout
+# XXX use our customize repo which skip some checks
 RUN git init execution-spec-tests && \
     cd execution-spec-tests && \
-    git remote add origin https://github.com/ethereum/execution-spec-tests.git && \
+    git remote add origin https://github.com/howjmay/execution-spec-tests && \
     git fetch --depth 1 origin $GIT_REF && \
     git checkout FETCH_HEAD;
 
+# For developing, we can use the tests case at local side directly
+# COPY /execution-spec-tests /execution-spec-tests
 WORKDIR /execution-spec-tests
 RUN uv sync
 
