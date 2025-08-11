@@ -27,7 +27,7 @@ import (
 	"github.com/hashicorp/yamux"
 )
 
-//go:embed Dockerfile go.mod go.sum *.go tool/*.go
+//go:embed Dockerfile Dockerfile.l1 go.mod go.sum *.go tool/*.go
 var Source embed.FS
 
 var muxcfg *yamux.Config

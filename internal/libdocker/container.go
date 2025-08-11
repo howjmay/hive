@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -106,6 +107,12 @@ func (b *ContainerBackend) CreateContainer(ctx context.Context, imageName string
 		},
 	}
 
+	if strings.Contains(opt.Name, "hive-l1-node") {
+		createOpts.HostConfig.PortBindings = map[docker.Port][]docker.PortBinding{
+			docker.Port("9000/tcp"): {{HostIP: "0.0.0.0", HostPort: "9000"}}, // host:container
+			docker.Port("9123/tcp"): {{HostIP: "0.0.0.0", HostPort: "9123"}}, // host:container
+		}
+	}
 	if opt.Input != nil {
 		// Pre-announce that stdin will be attached. The stdin attachment
 		// will fail silently if this is not set.

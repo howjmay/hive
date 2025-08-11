@@ -86,6 +86,27 @@ func (b *Builder) BuildImage(ctx context.Context, name string, fsys fs.FS) error
 	return nil
 }
 
+func (b *Builder) BuildImageRelative(ctx context.Context, name string, fsys fs.FS, dockerfileRel string) error {
+	// sanity check that the Dockerfile exists in the FS you’re about to archive
+	if _, err := fs.Stat(fsys, dockerfileRel); err != nil {
+		return fmt.Errorf("dockerfile %q not found in context: %w", dockerfileRel, err)
+	}
+
+	opts := b.buildConfig(ctx, name)
+	opts.Dockerfile = dockerfileRel
+	pipeR, pipeW := io.Pipe()
+	opts.InputStream = pipeR
+
+	go func() {
+		if err := b.archiveFS(ctx, pipeW, fsys); err != nil {
+			_ = pipeW.CloseWithError(err)
+		}
+	}()
+
+	b.logger.Info("building image", "image", name, "dockerfile", dockerfileRel)
+	return b.client.BuildImage(opts)
+}
+
 func (b *Builder) buildConfig(ctx context.Context, name string) docker.BuildImageOptions {
 	nocache := false
 	if b.config.NoCachePattern != nil {

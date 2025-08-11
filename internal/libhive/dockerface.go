@@ -95,6 +95,7 @@ type Builder interface {
 	BuildClientImage(ctx context.Context, client ClientDesignator) (string, error)
 	BuildSimulatorImage(ctx context.Context, name string, buildArgs map[string]string) (string, error)
 	BuildImage(ctx context.Context, name string, fsys fs.FS) error
+	BuildImageRelative(ctx context.Context, name string, fsys fs.FS, dockerfileRel string) error
 
 	// ReadFile returns the content of a file in the given image.
 	ReadFile(ctx context.Context, image, path string) ([]byte, error)

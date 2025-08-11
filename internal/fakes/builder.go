@@ -46,6 +46,10 @@ func (b *fakeBuilder) BuildImage(ctx context.Context, name string, fsys fs.FS) e
 	return nil
 }
 
+func (b *fakeBuilder) BuildImageRelative(ctx context.Context, name string, fsys fs.FS, dockerfileRel string) error {
+	return nil
+}
+
 func (b *fakeBuilder) ReadFile(ctx context.Context, image, file string) ([]byte, error) {
 	if b.hooks.ReadFile != nil {
 		return b.hooks.ReadFile(ctx, image, file)

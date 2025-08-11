@@ -1,0 +1,23 @@
+# Final runtime image
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates curl tar libpq5 \
+ && rm -rf /var/lib/apt/lists/*
+
+# IOTA release to fetch
+ENV IOTA_VERSION=v1.2.3
+
+# Download, extract to /tmp, move only the binary into /usr/local/bin
+RUN set -eux; \
+    curl -L "https://github.com/iotaledger/iota/releases/download/${IOTA_VERSION}/iota-${IOTA_VERSION}-linux-x86_64.tgz" -o /tmp/iota.tgz; \
+    tar -xzf /tmp/iota.tgz -C /tmp; \
+    find /tmp -maxdepth 2 -type f -name iota -exec mv {} /usr/local/bin/iota \; ; \
+    chmod +x /usr/local/bin/iota; \
+    rm -rf /tmp/iota*;
+
+EXPOSE 9000 9123
+
+# Use JSON-form ENTRYPOINT and put args in CMD (easier to override at runtime)
+ENTRYPOINT ["/usr/local/bin/iota"]
+CMD ["start","--force-regenesis","--epoch-duration-ms=30000","--with-faucet","--faucet-amount=1000000000000"]

@@ -13,9 +13,15 @@ import (
 )
 
 const hiveproxyTag = "hive/hiveproxy"
+const l1nodeTag = "hive/l1-node"
 
 // Build builds the hiveproxy image.
 func (cb *ContainerBackend) Build(ctx context.Context, b libhive.Builder) error {
+	// build l1 node image first
+	if err := b.BuildImageRelative(ctx, l1nodeTag, hiveproxy.Source, "Dockerfile.l1"); err != nil {
+		return err
+	}
+
 	return b.BuildImage(ctx, hiveproxyTag, hiveproxy.Source)
 }
 
@@ -83,18 +89,26 @@ func (cb *ContainerBackend) ServeAPI(ctx context.Context, h http.Handler) (libhi
 	// Register proxy in ContainerBackend, so it can be used for CheckLive.
 	cb.proxy = proxy
 	slog.Info("hiveproxy started", "container", id[:12], "addr", srv.Addr())
+
+	l1ContainerID, err := cb.StartL1Node(ctx)
+	if err != nil {
+		return nil, err
+	}
+	srv.l1NodeContainerID = l1ContainerID
+
 	return srv, nil
 }
 
 type proxyContainer struct {
 	cb *ContainerBackend
 
-	containerID     string
-	containerIP     net.IP
-	containerStdin  *io.PipeReader
-	containerStdout *io.PipeWriter
-	containerWait   func()
-	proxy           *hiveproxy.Proxy
+	containerID       string
+	l1NodeContainerID string
+	containerIP       net.IP
+	containerStdin    *io.PipeReader
+	containerStdout   *io.PipeWriter
+	containerWait     func()
+	proxy             *hiveproxy.Proxy
 
 	stopping sync.Once
 	stopErr  error
@@ -115,10 +129,38 @@ func (c *proxyContainer) Close() error {
 		c.containerStdin.Close()
 		c.containerStdout.Close()
 		c.stopErr = c.cb.DeleteContainer(c.containerID)
+		c.stopErr = c.cb.DeleteContainer(c.l1NodeContainerID)
 		c.containerWait()
 
 		// Stop the local HTTP receiver.
 		c.proxy.Close()
 	})
 	return c.stopErr
+}
+
+func (cb *ContainerBackend) StartL1Node(ctx context.Context) (string, error) {
+	inR, _ := io.Pipe()
+	_, outW := io.Pipe()
+
+	// Create labels for hiveproxy container.
+	l1nodeLabels := libhive.NewBaseLabels(cb.hiveInstanceID, cb.hiveVersion)
+
+	// Generate container name.
+	containerName := "hive-l1-node"
+
+	opts := libhive.ContainerOptions{Output: outW, Input: inR, Labels: l1nodeLabels, Name: containerName}
+
+	id, err := cb.CreateContainer(ctx, l1nodeTag, opts)
+	if err != nil {
+		return "", err
+	}
+
+	// Now start the container.
+	info, err := cb.StartContainer(ctx, id, opts)
+	if err != nil {
+		cb.DeleteContainer(id)
+		return "", err
+	}
+
+	return info.ID, nil
 }
