@@ -2,10 +2,10 @@
 FROM golang:1.23 AS evmbuilder
 
 WORKDIR /src
-# RUN git clone --depth=1 --branch emulator https://github.com/howjmay/wasp.git waspclone
-# WORKDIR /src/waspclone/tools/evm/evmemulator
-COPY waspclone /src/wasp
-WORKDIR /src/wasp/tools/evm/evmemulator
+RUN git clone --depth=1 --branch emulator https://github.com/howjmay/wasp.git waspclone
+WORKDIR /src/waspclone/tools/evm/evmemulator
+# COPY waspclone /src/wasp
+# WORKDIR /src/wasp/tools/evm/evmemulator
 RUN go build -o /evmemulator
 
 # Stage 2: Final runtime image
