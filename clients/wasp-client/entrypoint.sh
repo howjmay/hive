@@ -30,4 +30,4 @@ set -e
 # Launch evmemulator in foreground
 # exec evmemulator --node-launch-mode=docker-compose --genesis=/etc/genesis.json
 # '/genesis.json' is the path of genesis file that hive pass the from fixtures
-exec evmemulator --node-launch-mode=docker-compose --genesis=/genesis.json
+exec evmemulator --node-launch-mode=docker-compose --remote-host=http://host.docker.internal --genesis=/genesis.json
