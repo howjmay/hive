@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y git
 # XXX use our customize repo which skip some checks
 RUN git init execution-spec-tests && \
     cd execution-spec-tests && \
-    git remote add origin https://github.com/howjmay/execution-spec-tests && \
+    git remote add origin https://github.com/iotaledger/execution-spec-tests && \
     git fetch --depth 1 origin $GIT_REF && \
     git checkout FETCH_HEAD;
 

@@ -13,8 +13,8 @@ RUN go build -o /evmemulator
 # Stage 2: Final runtime image
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get install -y curl tar ca-certificates libpq5 \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y curl tar ca-certificates libpq5 \
+#     && rm -rf /var/lib/apt/lists/*
 
 # # Download and extract IOTA release
 # ENV IOTA_VERSION=v1.2.3
